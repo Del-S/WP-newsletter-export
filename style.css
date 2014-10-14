@@ -1,0 +1,8 @@
+.method label { margin: 0 15px 0 2px; }
+
+.added_field { display: none; }
+
+.send_fields .new th input { margin: 0; padding: 3px 5px;}
+
+.send_url { width: 299px; margin-top: 5px; font-size: small; color: #6c6c6c !important; }
+.send_submit { float: right; margin-top: 5px; }
