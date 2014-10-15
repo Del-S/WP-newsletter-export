@@ -31,6 +31,7 @@ if (is_plugin_active('newsletter/plugin.php')) {
 class NewsExport {
 	/* PHP5 constructor */
 	function __construct() {
+        /* add code for moving /ext/page.php to extenstions/subscription/page.php - if not exist of course */
         add_action( 'plugins_loaded', array(&$this,'newsexport_init') );
 	}
     
@@ -50,6 +51,15 @@ class NewsExport {
             add_filter( 'plugin_action_links', array(&$this,'nle_links'));            
 			register_deactivation_hook( __FILE__, array(&$this,'nle_deactivate') );
 		}
+        
+        add_action( 'wp_ajax_nle_get_user_ajax', 'nle_send_data' );
+        add_action( 'wp_ajax_nopriv_nle_get_user_ajax', 'nle_send_data' );
+    
+        add_action( 'wp_ajax_nle_ajax_subscription', 'nle_send_data' );
+        add_action( 'wp_ajax_nopriv_nle_ajax_subscription', 'nle_send_data' );
+    
+        add_action( 'wp_ajax_nle_ajax_confirm', 'nle_confirm_send_curl' );
+        add_action( 'wp_ajax_nopriv_nle_ajax_confirm', 'nle_confirm_send_curl' );
     }
     
     function nle_links($links) {

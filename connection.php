@@ -1,5 +1,5 @@
 <?php 
-//add_filter('newsletter_user_subscribe','nle_send_data',10,1);
+add_filter('newsletter_user_subscribe','nle_send_data',10,1);
 
 /* Note to mention: during php called subscription user is not created yet (has no ID and is not in database).
 Cant send the id. All ajax calls are after user is created (Ajax subsciption and confirmation). 
@@ -10,17 +10,19 @@ if(!function_exists('nle_send_data')) {
         global $NewsExport, $newsletter;
         
         $send_options = $NewsExport->get_options(); 
-        if(empty($send_options)) { return; }
+        if(empty($send_options)) { return; }        
+        if(($user != null) && (!empty($user['id']))) { return; }
         
         $send_method = $send_options['send_option_active'];
         $send_data = $send_options['send_variables'];
+        $send_url = $send_options['send_url'];
         $user_data = $user;
         
         if(empty($send_data)) { return; }
         
         if(($_POST['action'] == 'nle_ajax_subscription') || ($_POST['action'] == 'nle_get_user_ajax')) {
             $token_id = $_POST['token'];
-            $token_id = split('-',$token_id, 2);
+            $token_id = explode('-',$token_id, 2);
             $user_id = $token_id[0];
             $user_token = $token_id[1];
     
@@ -59,13 +61,21 @@ if(!function_exists('nle_send_data')) {
             return;
         }
         
-        if( $send_method == 1 ) { /* send curl data */ } 
-        else if( $send_method == 1 ) { /* trigger ajax send from php */ }
-        // TODO: ajax send from filter hook
+        if( $send_method == 1 ) { /* Sending data via curl */
+            $data['action'] = 'curl_user_subscription';
+            $response = wp_remote_post($send_url,  array(
+	           'method' => 'POST',
+	           'timeout' => 45,
+	           'redirection' => 5,
+	           'httpversion' => '1.0',
+	           'blocking' => true,
+	           'body' => $data,
+            ));
+        } else { }
         
         /* Testing purposes - delete when done */
-        delete_option('feed_data');
-        add_option('feed_data', $data);
+        //delete_option('feed_data');
+        //add_option('feed_data', $data);
         delete_option('feed_user');
         add_option( 'feed_user', $user_data );
         
@@ -75,20 +85,31 @@ if(!function_exists('nle_send_data')) {
 
 if(!function_exists('nle_confirm_send_curl')) {
     function nle_confirm_send_curl() { 
-        global $newsletter;
+        global $NewsExport, $newsletter;
+        $send_options = $NewsExport->get_options(); 
+        $send_url = $send_options['send_url'];
+        
         $token_id = $_POST['token'];
-        $token_id = split('-',$token_id, 2);
+        $token_id = explode('-',$token_id, 2);
         $user_id = $token_id[0];
         $user_token = $token_id[1];
     
         $user = $newsletter->get_user($user_id);
-        if ($user->status == 'C') { 
-            // send curl data
+        if ($user->status == "S") { // change to C
+            $user->action = 'curl_user_confirmation';
+            $response = wp_remote_post($send_url,  array(
+	           'method' => 'POST',
+	           'timeout' => 45,
+	           'redirection' => 5,
+	           'httpversion' => '1.0',
+	           'blocking' => true,
+	           'body' => $user,
+            ));
         }
     
         /* Testing purposes - delete when done */
-        delete_option('feed_ajax');
-        add_option('feed_ajax', $id."----".$token);
+        //delete_option('feed_ajax');
+        //add_option('feed_ajax', $user->status);
     }
 }
 ?>
