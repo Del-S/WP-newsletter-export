@@ -80,7 +80,7 @@ function display_newsletter_export_settings() {
         </form>
 <?php /* Testing purposes - delete when done */ ?>
 <p><?php print_r(get_option( 'feed_user' )); echo "--"; ?></p>
-<p><?php print_r(get_option( 'feed_data' )); echo "--"; ?></p>
+<p><?php print_r(get_option( 'feed_data_2' )); echo "-data-"; ?></p>
 <p><?php print_r(get_option( 'feed_ajax' )); echo "--"; ?></p>
 
 <?php if(!has_filter('newsletter_user_subscribe')) { $error = '<p class="error">'.__('Filter for subscription does not exist. Switches to jQuery.','newsletter-export').'</p>'; echo $error; }  ?>
